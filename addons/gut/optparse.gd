@@ -147,6 +147,7 @@ class Option:
 	var option_name = ''
 	var default = null
 	var description = ''
+	var hidden = false
 
 	func _init(name, default_value, desc=''):
 		option_name = name
@@ -179,6 +180,11 @@ var _banner = ''
 func add(name, default, desc):
 	options.append(Option.new(name, default, desc))
 
+func add_hidden(name, default, desc):
+	var opt = Option.new(name, default, desc)
+	opt.hidden = true
+	options.append(opt)
+
 func get_value(name):
 	var found = false
 	var idx = 0
@@ -209,7 +215,8 @@ func print_help():
 
 	print("\nOptions\n-------")
 	for i in range(options.size()):
-		print('  ' + options[i].to_s(longest + 2))
+		if(!options[i].hidden):
+			print('  ' + options[i].to_s(longest + 2))
 	print('---------------------------------------------------------')
 
 func print_options():

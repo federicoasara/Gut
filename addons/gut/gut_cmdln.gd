@@ -166,6 +166,8 @@ func setup_options(options, font_names):
 
 	opts.add('-gjunit_xml_file', options.junit_xml_file, 'Export results of run to this file in the Junit XML format.')
 	opts.add('-gjunit_xml_timestamp', options.junit_xml_timestamp, 'Include a timestamp in the -gjunit_xml_file, default [default]')
+
+	opts.add_hidden('-gdbg', options.run_through_debugger, 'Indicates GUT is running through debugger.')
 	return opts
 
 
@@ -202,6 +204,8 @@ func extract_command_line_options(from, to):
 	to.junit_xml_file = from.get_value('-gjunit_xml_file')
 	to.junit_xml_timestamp = from.get_value('-gjunit_xml_timestamp')
 
+	to.run_through_debugger = from.get_value('-gdbg')
+
 
 
 func _print_gutconfigs(values):
@@ -215,6 +219,7 @@ option (option priority:  command-line, .gutconfig, default)."""
 	# remove some options that don't make sense to be in config
 	resolved.erase("config_file")
 	resolved.erase("show_help")
+	resolved.erase("run_through_debugger")
 
 	print("Here's a config with all the properties set based off of your current command and config.")
 	print(JSON.print(resolved, '  '))

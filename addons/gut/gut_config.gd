@@ -30,6 +30,7 @@ var default_options = {
 	post_run_script = '',
 	pre_run_script = '',
 	prefix = 'test_',
+	run_through_debugger=false,
 	selected = '',
 	should_exit = false,
 	should_exit_on_success = false,
@@ -154,6 +155,10 @@ func _apply_options(opts, _tester):
 		_tester.get_gui().set_default_font_color(Color(opts.font_color))
 	if(opts.background_color != null and opts.background_color.is_valid_html_color()):
 		_tester.get_gui().set_background_color(Color(opts.background_color))
+
+	if(opts.run_through_debugger):
+		_tester.get_logger().disable_printer('terminal', true)
+		_tester.get_logger().disable_printer('console', false)
 
 	return _tester
 

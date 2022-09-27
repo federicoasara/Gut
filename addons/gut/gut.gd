@@ -432,14 +432,14 @@ func _yielding_callback(from_obj=false,
 		__arg1=null, __arg2=null, __arg3=null,
 		__arg4=null, __arg5=null, __arg6=null,
 		__arg7=null, __arg8=null, __arg9=null):
-	_lgr.end_yield()
-	if(_yielding_to.obj != null):
-		_yielding_to.obj.call_deferred(
-			"disconnect",
-			_yielding_to.signal_name, self,
-			'_yielding_callback')
-		_yielding_to.obj = null
-		_yielding_to.signal_name = ''
+	# _lgr.end_yield()
+	# if(_yielding_to.obj != null):
+	# 	_yielding_to.obj.call_deferred(
+	# 		"disconnect",
+	# 		_yielding_to.signal_name, self,
+	# 		'_yielding_callback')
+	# 	_yielding_to.obj = null
+	# 	_yielding_to.signal_name = ''
 
 	if(from_obj):
 		# we must yield for a little longer after the signal is emitted so that
@@ -790,10 +790,10 @@ func _run_test(script_inst, test_name):
 	# ----
 
 	start_test.emit(test_name)
-	# When the script yields it will return a GDScriptFunctionState object
 
 	await script_inst.call(test_name)
 	# TODO 4.0 GDScriptFunctionState? ----
+	# When the script yields it will return a GDScriptFunctionState object
 	# script_result = await script_inst.call(test_name)
 	# if(_is_function_state(script_result)):
 	# 	await _wait_for_done(script_result)
@@ -808,7 +808,6 @@ func _run_test(script_inst, test_name):
 
 	script_inst.clear_signal_watcher()
 
-	# call each post-each-test method until teardown is removed.
 	await script_inst.after_each()
 	# TODO 4.0 GDScriptFunctionState? ----
 	# var after_each_result = await script_inst.after_each()
@@ -841,8 +840,6 @@ func _call_before_all(test_script):
 	_current_test.has_printed_name = false
 	_lgr.inc_indent()
 
-	# Next 3 lines can be removed when prerun_setup removed.
-	_current_test.name = 'prerun_setup'
 	_current_test.name = 'before_all'
 
 	await test_script.before_all()
@@ -866,10 +863,7 @@ func _call_after_all(test_script):
 	_current_test.has_printed_name = false
 	_lgr.inc_indent()
 
-	# Next 3 lines can be removed when postrun_teardown removed.
-	_current_test.name = 'postrun_teardown'
 	_current_test.name = 'after_all'
-
 
 	await test_script.after_all()
 	# TODO 4.0 GDScriptFunctionState? ----
@@ -1361,8 +1355,9 @@ func pause_before_teardown():
 #  await gut.set_yield_time(10).timeout
 # ------------------------------------------------------------------------------
 func set_yield_time(time, text=''):
-	_yield_timer.set_wait_time(time)
-	_yield_timer.start()
+	_awaiter.pause_for(time)
+	# _yield_timer.set_wait_time(time)
+	# _yield_timer.start()
 	var msg = '-- Yielding (' + str(time) + 's)'
 	if(text == ''):
 		msg += ' --'
@@ -1380,6 +1375,7 @@ func set_yield_time(time, text=''):
 # required for _process in test.gd scripts to count N frames.
 # ------------------------------------------------------------------------------
 func set_yield_frames(frames, text=''):
+	_awaiter.pause_frames(max(frames + 1, 1))
 	var msg = '-- Yielding (' + str(frames) + ' frames)'
 	if(text == ''):
 		msg += ' --'
@@ -1388,7 +1384,7 @@ func set_yield_frames(frames, text=''):
 	_lgr.yield_msg(msg)
 
 	_was_yield_method_called = true
-	_yield_frames = max(frames + 1, 1)
+	# _yield_frames = max(frames + 1, 1)
 	return self
 
 # ------------------------------------------------------------------------------
@@ -1396,12 +1392,13 @@ func set_yield_frames(frames, text=''):
 # number of seconds, whichever comes first.
 # ------------------------------------------------------------------------------
 func set_yield_signal_or_time(obj, signal_name, max_wait, text=''):
-	obj.connect(signal_name,Callable(self,'_yielding_callback'),true)
-	_yielding_to.obj = obj
-	_yielding_to.signal_name = signal_name
+	_awaiter.pause_until(Signal(obj, signal_name), max_wait)
+	# obj.connect(signal_name,Callable(self,'_yielding_callback'),true)
+	# _yielding_to.obj = obj
+	# _yielding_to.signal_name = signal_name
 
-	_yield_timer.set_wait_time(max_wait)
-	_yield_timer.start()
+	# _yield_timer.set_wait_time(max_wait)
+	# _yield_timer.start()
 	_was_yield_method_called = true
 	_lgr.yield_msg(str('-- Yielding to signal "', signal_name, '" or for ', max_wait, ' seconds -- ', text))
 	return self

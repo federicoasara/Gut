@@ -30,6 +30,7 @@ func _end_pause():
     pause_ended.emit()
 
 func _signal_callback():
+    print('_signal_callback: ', Time.get_ticks_msec())
     _pause_until_signal.disconnect(_signal_callback)
     _end_pause()
 

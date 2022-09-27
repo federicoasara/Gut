@@ -55,7 +55,7 @@ var _watched_signals = {}
 var _utils = load('res://addons/gut/utils.gd').get_instance()
 
 func _add_watched_signal(obj, name):
-	print('add ', obj, ': ', name)
+	print('  connecting to ', obj, ': ', name)
 	# SHORTCIRCUIT - ignore dupes
 	if(_watched_signals.has(obj) and _watched_signals[obj].has(name)):
 		return
@@ -81,7 +81,7 @@ func _on_watched_signal(arg1=ARG_NOT_SET, arg2=ARG_NOT_SET, arg3=ARG_NOT_SET, \
 						arg4=ARG_NOT_SET, arg5=ARG_NOT_SET, arg6=ARG_NOT_SET, \
 						arg7=ARG_NOT_SET, arg8=ARG_NOT_SET, arg9=ARG_NOT_SET, \
 						arg10=ARG_NOT_SET, arg11=ARG_NOT_SET):
-	print('_on_watched_signal: ', Time.get_ticks_msec())
+	print('signal_watcher._on_watched_signal: ', Time.get_ticks_msec())
 	var args = [arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11]
 
 	# strip off any unused vars.
@@ -97,10 +97,10 @@ func _on_watched_signal(arg1=ARG_NOT_SET, arg2=ARG_NOT_SET, arg3=ARG_NOT_SET, \
 	var object = args[args.size() -1]
 	args.pop_back()
 
-	print('_on_watched_signal ', object, ': ', signal_name)
+	print('  ', object, ': ', signal_name)
 	var sig = Signal(object, signal_name)
 	if(!sig.is_connected(_on_watched_signal)):
-		print('!! not connected to the signal that triggered this !!')
+		print('  !! not connected to the signal that triggered this !!')
 	_watched_signals[object][signal_name].append(args)
 
 # This parameter stuff should go into test.gd not here.  This thing works
@@ -126,6 +126,7 @@ func does_object_have_signal(object, signal_name):
 
 func watch_signals(object):
 	var signals = object.get_signal_list()
+	print('signal_watcher.watch signals')
 	for i in range(signals.size()):
 		_add_watched_signal(object, signals[i]['name'])
 
@@ -173,15 +174,16 @@ func is_watching(object, signal_name):
 	return _watched_signals.has(object) and _watched_signals[object].has(signal_name)
 
 func clear():
-	print('cleared')
+	print('signal_watcher clearing')
 	for obj in _watched_signals:
 		if(_utils.is_not_freed(obj)):
 			for signal_name in _watched_signals[obj]:
-				print('disconnect ', obj, ': ', signal_name)
+				print('  disconnect ', obj, ': ', signal_name)
 				var sig = Signal(obj, signal_name)
 				sig.disconnect(_on_watched_signal)
 
 	_watched_signals.clear()
+	print('signal_watcher cleared')
 
 # Returns a list of all the signal names that were emitted by the object.
 # If the object is not being watched then an empty list is returned.
